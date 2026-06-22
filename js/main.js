@@ -15,6 +15,9 @@ import {
     getDocs,
     deleteDoc,
     doc,
+    setDoc,
+    getDoc,
+    updateDoc,
     query,
     orderBy,
     serverTimestamp
@@ -32,29 +35,49 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const passwordConfirmInput = document.querySelector("#passwordConfirmInput");
-const myTab = document.querySelector("#myTab");
+
 const CLOUD_NAME = "dbchhfvai";
 const UPLOAD_PRESET = "almanac_unsigned";
 
 const authBox = document.querySelector("#authBox");
 const userBox = document.querySelector("#userBox");
-const emailInput = document.querySelector("#emailInput");
-const passwordInput = document.querySelector("#passwordInput");
-const signupBtn = document.querySelector("#signupBtn");
-const loginBtn = document.querySelector("#loginBtn");
-const logoutBtn = document.querySelector("#logoutBtn");
 const userEmail = document.querySelector("#userEmail");
+
+const loginForm = document.querySelector("#loginForm");
+const signupForm = document.querySelector("#signupForm");
+
+const loginEmailInput = document.querySelector("#loginEmailInput");
+const loginPasswordInput = document.querySelector("#loginPasswordInput");
+
+const signupEmailInput = document.querySelector("#signupEmailInput");
+const signupPasswordInput = document.querySelector("#signupPasswordInput");
+const passwordConfirmInput = document.querySelector("#passwordConfirmInput");
+const displayNameInput = document.querySelector("#displayNameInput");
+
+const loginBtn = document.querySelector("#loginBtn");
+const signupBtn = document.querySelector("#signupBtn");
+const logoutBtn = document.querySelector("#logoutBtn");
+const showSignupBtn = document.querySelector("#showSignupBtn");
+const showLoginBtn = document.querySelector("#showLoginBtn");
 
 const feedView = document.querySelector("#feedView");
 const archiveView = document.querySelector("#archiveView");
+const profileView = document.querySelector("#profileView");
+
 const calendar = document.querySelector("#calendar");
 const archiveTitle = document.querySelector("#archiveTitle");
 
-const feedTab = document.querySelector("#feedTab");
 const archiveTab = document.querySelector("#archiveTab");
+const feedTab = document.querySelector("#feedTab");
+const myTab = document.querySelector("#myTab");
+const profileTab = document.querySelector("#profileTab");
+
 const prevMonthBtn = document.querySelector("#prevMonthBtn");
 const nextMonthBtn = document.querySelector("#nextMonthBtn");
+
+const profileEmail = document.querySelector("#profileEmail");
+const profileNameInput = document.querySelector("#profileNameInput");
+const saveProfileBtn = document.querySelector("#saveProfileBtn");
 
 const addBtn = document.querySelector("#addBtn");
 const modal = document.querySelector("#modal");
@@ -69,7 +92,8 @@ let entries = [];
 let selectedFile = null;
 let currentCategory = "All";
 let currentUser = null;
-let currentView = "public";
+let currentUserProfile = null;
+let currentView = "library";
 let selectedAuthorId = null;
 
 const today = new Date();
@@ -127,6 +151,25 @@ async function uploadImageToCloudinary(file) {
     return data.secure_url;
 }
 
+async function loadUserProfile(user) {
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+
+    if (userDoc.exists()) {
+        currentUserProfile = userDoc.data();
+    } else {
+        currentUserProfile = {
+            displayName: user.email,
+            email: user.email
+        };
+
+        await setDoc(doc(db, "users", user.uid), currentUserProfile);
+    }
+
+    userEmail.textContent = `${currentUserProfile.displayName}'s Almanac`;
+    profileEmail.textContent = currentUserProfile.email;
+    profileNameInput.value = currentUserProfile.displayName;
+}
+
 async function loadEntries() {
     const q = query(collection(db, "entries"), orderBy("rawDate", "desc"));
     const snapshot = await getDocs(q);
@@ -175,7 +218,11 @@ function renderFeed(customEntries = null) {
                 ? `<img src="${entry.photoUrl}" class="entry-image" alt="">`
                 : ""
             }
-        <div class="entry-author" onclick="viewAuthor('${entry.userId}', '${entry.userEmail}')">${entry.userEmail}</div>
+
+        <div class="entry-author" onclick="viewAuthor('${entry.userId}', '${entry.displayName || entry.userEmail}')">
+          ${entry.displayName || entry.userEmail}
+        </div>
+
         <div class="entry-category">${entry.category}</div>
 
         <h2 class="entry-title">${entry.title}</h2>
@@ -250,30 +297,43 @@ function renderCalendar() {
     }
 }
 
-function showFeed() {
-    feedView.style.display = "block";
+function clearViews() {
+    feedView.style.display = "none";
     archiveView.classList.remove("active");
+    profileView.classList.remove("active");
+
+    archiveTab.classList.remove("active-tab");
+    feedTab.classList.remove("active-tab");
+    myTab.classList.remove("active-tab");
+    profileTab.classList.remove("active-tab");
+}
+
+function showFeed() {
+    clearViews();
+
+    feedView.style.display = "block";
 
     if (currentView === "mine") {
         myTab.classList.add("active-tab");
-        feedTab.classList.remove("active-tab");
     } else {
         feedTab.classList.add("active-tab");
-        myTab.classList.remove("active-tab");
     }
-
-    archiveTab.classList.remove("active-tab");
 }
 
 function showArchive() {
-    feedView.style.display = "none";
-    archiveView.classList.add("active");
+    clearViews();
 
+    archiveView.classList.add("active");
     archiveTab.classList.add("active-tab");
-    feedTab.classList.remove("active-tab");
-    myTab.classList.remove("active-tab");
 
     renderCalendar();
+}
+
+function showProfile() {
+    clearViews();
+
+    profileView.classList.add("active");
+    profileTab.classList.add("active-tab");
 }
 
 function resetForm() {
@@ -293,9 +353,29 @@ window.deleteEntry = async function (id) {
     if (!ok) return;
 
     await deleteDoc(doc(db, "entries", id));
-
     await loadEntries();
 };
+
+window.viewAuthor = function (userId, name) {
+    selectedAuthorId = userId;
+    currentView = "author";
+
+    feedTab.textContent = `${name}'s Almanac`;
+
+    showFeed();
+    renderFeed();
+    renderCalendar();
+};
+
+showSignupBtn.addEventListener("click", () => {
+    loginForm.style.display = "none";
+    signupForm.style.display = "block";
+});
+
+showLoginBtn.addEventListener("click", () => {
+    signupForm.style.display = "none";
+    loginForm.style.display = "block";
+});
 
 photoInput.addEventListener("change", () => {
     const file = photoInput.files[0];
@@ -356,6 +436,7 @@ saveBtn.addEventListener("click", async () => {
             displayDate: formatDate(now),
             userId: currentUser.uid,
             userEmail: currentUser.email,
+            displayName: currentUserProfile?.displayName || currentUser.email,
             createdAt: serverTimestamp()
         });
 
@@ -371,10 +452,15 @@ saveBtn.addEventListener("click", async () => {
     }
 });
 
+archiveTab.addEventListener("click", () => {
+    showArchive();
+});
+
 feedTab.addEventListener("click", () => {
-    currentView = "public";
+    currentView = "library";
     selectedAuthorId = null;
-    feedTab.textContent = "Public";
+    feedTab.textContent = "Library";
+
     showFeed();
     renderFeed();
 });
@@ -384,22 +470,23 @@ myTab.addEventListener("click", () => {
         alert("Please log in first.");
         return;
     }
+
     currentView = "mine";
     selectedAuthorId = null;
-    feedTab.textContent = "Public";
+    feedTab.textContent = "Library";
 
     showFeed();
-
-    myTab.classList.add("active-tab");
-    feedTab.classList.remove("active-tab");
-    archiveTab.classList.remove("active-tab");
-
     renderFeed();
     renderCalendar();
 });
 
-archiveTab.addEventListener("click", () => {
-    showArchive();
+profileTab.addEventListener("click", () => {
+    if (!currentUser) {
+        alert("Please log in first.");
+        return;
+    }
+
+    showProfile();
 });
 
 prevMonthBtn.addEventListener("click", () => {
@@ -440,17 +527,28 @@ categoryBtns.forEach((button) => {
 });
 
 signupBtn.addEventListener("click", async () => {
-    if (passwordInput.value !== passwordConfirmInput.value) {
+    if (!displayNameInput.value) {
+        alert("Username is required.");
+        return;
+    }
+
+    if (signupPasswordInput.value !== passwordConfirmInput.value) {
         alert("Passwords do not match.");
         return;
     }
 
     try {
-        await createUserWithEmailAndPassword(
+        const userCredential = await createUserWithEmailAndPassword(
             auth,
-            emailInput.value,
-            passwordInput.value
+            signupEmailInput.value,
+            signupPasswordInput.value
         );
+
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+            displayName: displayNameInput.value,
+            email: signupEmailInput.value,
+            createdAt: serverTimestamp()
+        });
     } catch (error) {
         alert(error.message);
     }
@@ -460,8 +558,8 @@ loginBtn.addEventListener("click", async () => {
     try {
         await signInWithEmailAndPassword(
             auth,
-            emailInput.value,
-            passwordInput.value
+            loginEmailInput.value,
+            loginPasswordInput.value
         );
     } catch (error) {
         alert(error.message);
@@ -472,29 +570,40 @@ logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
 });
 
+saveProfileBtn.addEventListener("click", async () => {
+    if (!currentUser) return;
+
+    await updateDoc(doc(db, "users", currentUser.uid), {
+        displayName: profileNameInput.value
+    });
+
+    await loadUserProfile(currentUser);
+
+    alert("Profile updated.");
+});
+
 onAuthStateChanged(auth, async (user) => {
     currentUser = user;
 
     if (user) {
         authBox.style.display = "none";
         userBox.style.display = "flex";
-        userEmail.textContent = user.email;
+
+        await loadUserProfile(user);
+
+        currentView = "mine";
+        selectedAuthorId = null;
+        feedTab.textContent = "Library";
+
+        await loadEntries();
+        showArchive();
     } else {
         authBox.style.display = "flex";
         userBox.style.display = "none";
         userEmail.textContent = "";
+        currentUserProfile = null;
+
+        await loadEntries();
+        showFeed();
     }
-
-    await loadEntries();
 });
-
-window.viewAuthor = function (userId, email) {
-    selectedAuthorId = userId;
-    currentView = "author";
-
-    feedTab.textContent = `${email}'s Almanac`;
-
-    showFeed();
-    renderFeed();
-    renderCalendar();
-};

@@ -382,3 +382,42 @@ select {
     font-size: 20px;
     cursor: pointer;
 }
+
+.profile-view {
+    display: none;
+}
+
+.profile-view.active {
+    display: block;
+}
+
+.profile-view h2 {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 42px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.profile-view p {
+    color: #8a786a;
+    margin-bottom: 16px;
+}
+
+.profile-view input {
+    width: 100%;
+    max-width: 360px;
+    padding: 12px;
+    border: 1px solid #d8cdbe;
+    background: #fffaf3;
+    color: #3d2b1f;
+}
+
+.profile-view button {
+    display: block;
+    margin-top: 12px;
+    padding: 12px 16px;
+    border: 1px solid #3d2b1f;
+    background: none;
+    color: #3d2b1f;
+    cursor: pointer;
+}

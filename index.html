@@ -11,12 +11,25 @@
 <body>
     <div class="app">
         <section class="auth-box" id="authBox">
-            <input type="email" id="emailInput" placeholder="Email">
-            <input type="password" id="passwordInput" placeholder="Password">
-            <input type="password" id="passwordConfirmInput" placeholder="Confirm password">
 
-            <button id="signupBtn">Sign up</button>
-            <button id="loginBtn">Log in</button>
+            <div id="loginForm">
+                <input type="email" id="loginEmailInput" placeholder="Email">
+                <input type="password" id="loginPasswordInput" placeholder="Password">
+
+                <button id="loginBtn">Log in</button>
+                <button id="showSignupBtn">Create account</button>
+            </div>
+
+            <div id="signupForm" style="display: none;">
+                <input type="text" id="displayNameInput" placeholder="Username">
+                <input type="email" id="signupEmailInput" placeholder="Email">
+                <input type="password" id="signupPasswordInput" placeholder="Password">
+                <input type="password" id="passwordConfirmInput" placeholder="Confirm password">
+
+                <button id="signupBtn">Sign up</button>
+                <button id="showLoginBtn">Back to log in</button>
+            </div>
+
         </section>
 
         <section class="user-box" id="userBox">
@@ -25,7 +38,7 @@
         </section>
         <header class="app-header">
             <h1>Almanac</h1>
-            <p>A place to collect what would otherwise be forgotten.</p>
+            <p>Collected over time.</p>
         </header>
 
         <section class="categories">
@@ -39,9 +52,10 @@
         </section>
 
         <section class="view-tabs">
-            <button id="feedTab" class="active-tab">Public</button>
-            <button id="myTab">My Almanac</button>
             <button id="archiveTab">Archive</button>
+            <button id="feedTab" class="active-tab">Mine</button>
+            <button id="myTab">Discovery</button>
+            <button id="profileTab">Profile</button>
         </section>
 
         <main id="feedView"></main>
@@ -64,6 +78,15 @@
             </div>
 
             <div id="calendar" class="calendar"></div>
+        </section>
+        <section id="profileView" class="profile-view">
+            <h2>Profile</h2>
+
+            <p id="profileEmail"></p>
+
+            <input type="text" id="profileNameInput" placeholder="Username">
+
+            <button id="saveProfileBtn">Save profile</button>
         </section>
     </div>
 
