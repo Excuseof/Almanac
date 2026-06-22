@@ -21,7 +21,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDyVei4WQWqxPgwwVKDlVciz28Zyj35xcQ",
+    apiKey: "AIzaSyDyVei4WQWqxPggwvKDlVciz28Zyj35xcQ",
     authDomain: "almanac-a0352.firebaseapp.com",
     projectId: "almanac-a0352",
     storageBucket: "almanac-a0352.firebasestorage.app",
