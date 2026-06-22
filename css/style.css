@@ -362,3 +362,23 @@ select {
     justify-content: space-between;
     color: #8a786a;
 }
+
+.entry-author {
+    margin-top: 12px;
+    margin-bottom: 8px;
+    color: #8a786a;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.entry-author:hover {
+    color: #3d2b1f;
+}
+
+#myTab {
+    border: none;
+    background: none;
+    color: #8a786a;
+    font-size: 20px;
+    cursor: pointer;
+}

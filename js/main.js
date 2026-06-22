@@ -32,7 +32,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
+const passwordConfirmInput = document.querySelector("#passwordConfirmInput");
+const myTab = document.querySelector("#myTab");
 const CLOUD_NAME = "dbchhfvai";
 const UPLOAD_PRESET = "almanac_unsigned";
 
@@ -68,6 +69,8 @@ let entries = [];
 let selectedFile = null;
 let currentCategory = "All";
 let currentUser = null;
+let currentView = "public";
+let selectedAuthorId = null;
 
 const today = new Date();
 let currentArchiveYear = today.getFullYear();
@@ -82,8 +85,21 @@ function formatDate(date) {
 }
 
 function getFilteredEntries() {
-    if (currentCategory === "All") return entries;
-    return entries.filter(entry => entry.category === currentCategory);
+    let filtered = entries;
+
+    if (currentView === "mine" && currentUser) {
+        filtered = filtered.filter(entry => entry.userId === currentUser.uid);
+    }
+
+    if (selectedAuthorId) {
+        filtered = filtered.filter(entry => entry.userId === selectedAuthorId);
+    }
+
+    if (currentCategory !== "All") {
+        filtered = filtered.filter(entry => entry.category === currentCategory);
+    }
+
+    return filtered;
 }
 
 async function uploadImageToCloudinary(file) {
@@ -159,7 +175,7 @@ function renderFeed(customEntries = null) {
                 ? `<img src="${entry.photoUrl}" class="entry-image" alt="">`
                 : ""
             }
-
+        <div class="entry-author" onclick="viewAuthor('${entry.userId}', '${entry.userEmail}')">${entry.userEmail}</div>
         <div class="entry-category">${entry.category}</div>
 
         <h2 class="entry-title">${entry.title}</h2>
@@ -238,7 +254,14 @@ function showFeed() {
     feedView.style.display = "block";
     archiveView.classList.remove("active");
 
-    feedTab.classList.add("active-tab");
+    if (currentView === "mine") {
+        myTab.classList.add("active-tab");
+        feedTab.classList.remove("active-tab");
+    } else {
+        feedTab.classList.add("active-tab");
+        myTab.classList.remove("active-tab");
+    }
+
     archiveTab.classList.remove("active-tab");
 }
 
@@ -248,6 +271,7 @@ function showArchive() {
 
     archiveTab.classList.add("active-tab");
     feedTab.classList.remove("active-tab");
+    myTab.classList.remove("active-tab");
 
     renderCalendar();
 }
@@ -348,8 +372,30 @@ saveBtn.addEventListener("click", async () => {
 });
 
 feedTab.addEventListener("click", () => {
+    currentView = "public";
+    selectedAuthorId = null;
+    feedTab.textContent = "Public";
     showFeed();
     renderFeed();
+});
+
+myTab.addEventListener("click", () => {
+    if (!currentUser) {
+        alert("Please log in first.");
+        return;
+    }
+    currentView = "mine";
+    selectedAuthorId = null;
+    feedTab.textContent = "Public";
+
+    showFeed();
+
+    myTab.classList.add("active-tab");
+    feedTab.classList.remove("active-tab");
+    archiveTab.classList.remove("active-tab");
+
+    renderFeed();
+    renderCalendar();
 });
 
 archiveTab.addEventListener("click", () => {
@@ -394,6 +440,11 @@ categoryBtns.forEach((button) => {
 });
 
 signupBtn.addEventListener("click", async () => {
+    if (passwordInput.value !== passwordConfirmInput.value) {
+        alert("Passwords do not match.");
+        return;
+    }
+
     try {
         await createUserWithEmailAndPassword(
             auth,
@@ -436,3 +487,14 @@ onAuthStateChanged(auth, async (user) => {
 
     await loadEntries();
 });
+
+window.viewAuthor = function (userId, email) {
+    selectedAuthorId = userId;
+    currentView = "author";
+
+    feedTab.textContent = `${email}'s Almanac`;
+
+    showFeed();
+    renderFeed();
+    renderCalendar();
+};
