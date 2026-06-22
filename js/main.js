@@ -80,8 +80,6 @@ const nextMonthBtn = document.querySelector("#nextMonthBtn");
 const profileEmail = document.querySelector("#profileEmail");
 const profileNameInput = document.querySelector("#profileNameInput");
 const saveProfileBtn = document.querySelector("#saveProfileBtn");
-const profileEntryCount = document.querySelector("#profileEntryCount");
-const profileCategoryCount = document.querySelector("#profileCategoryCount");
 
 const addBtn = document.querySelector("#addBtn");
 const modal = document.querySelector("#modal");
@@ -381,19 +379,6 @@ profileTab.addEventListener("click", () => {
     showProfile();
 });
 
-function updateProfileStats() {
-    if (!currentUser) return;
-
-    const myEntries = entries.filter(entry => entry.userId === currentUser.uid);
-
-    const categories = new Set(
-        myEntries.map(entry => entry.category)
-    );
-
-    profileEntryCount.textContent = myEntries.length;
-    profileCategoryCount.textContent = categories.size;
-}
-
 function resetForm() {
     document.querySelector("#title").value = "";
     document.querySelector("#description").value = "";
@@ -537,15 +522,6 @@ myTab.addEventListener("click", () => {
     showFeed();
     renderFeed();
     renderCalendar();
-});
-
-profileTab.addEventListener("click", () => {
-    if (!currentUser) {
-        alert("Please log in first.");
-        return;
-    }
-
-    showProfile();
 });
 
 prevMonthBtn.addEventListener("click", () => {
