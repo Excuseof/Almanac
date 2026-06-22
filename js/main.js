@@ -63,6 +63,8 @@ const showLoginBtn = document.querySelector("#showLoginBtn");
 const feedView = document.querySelector("#feedView");
 const archiveView = document.querySelector("#archiveView");
 const profileView = document.querySelector("#profileView");
+const profileEntryCount = document.querySelector("#profileEntryCount");
+const profileCategoryCount = document.querySelector("#profileCategoryCount");
 
 const calendar = document.querySelector("#calendar");
 const archiveTitle = document.querySelector("#archiveTitle");
@@ -185,6 +187,7 @@ async function loadEntries() {
 
     renderFeed();
     renderCalendar();
+    updateProfileStats();
 }
 
 function renderFeed(customEntries = null) {
@@ -331,13 +334,34 @@ function showArchive() {
     renderCalendar();
 }
 
+function updateProfileStats() {
+
+    if (!currentUser) return;
+
+    const myEntries =
+        entries.filter(
+            entry => entry.userId === currentUser.uid
+        );
+
+    const categories =
+        new Set(
+            myEntries.map(
+                entry => entry.category
+            )
+        );
+
+    profileEntryCount.textContent =
+        myEntries.length;
+
+    profileCategoryCount.textContent =
+        categories.size;
+}
+
 function showProfile() {
     clearViews();
-
     profileView.style.display = "block";
     profileView.classList.add("active");
     profileTab.classList.add("active-tab");
-
     updateProfileStats();
 }
 

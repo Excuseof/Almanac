@@ -421,3 +421,39 @@ select {
     color: #3d2b1f;
     cursor: pointer;
 }
+
+.profile-stats {
+
+    display: flex;
+
+    gap: 24px;
+
+    margin: 24px 0 32px;
+}
+
+.stat-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+}
+
+.stat-card strong {
+
+    font-family: "Cormorant Garamond", serif;
+
+    font-size: 42px;
+
+    font-weight: 500;
+
+    color: #3d2b1f;
+}
+
+.stat-card span {
+
+    color: #8a786a;
+
+    font-size: 14px;
+}
