@@ -53,8 +53,8 @@
 
         <section class="view-tabs">
             <button id="archiveTab">Archive</button>
-            <button id="feedTab" class="active-tab">Mine</button>
-            <button id="myTab">Discovery</button>
+            <button id="myTab" class="active-tab">Mine</button>
+            <button id="feedTab">Discovery</button>
             <button id="profileTab">Profile</button>
         </section>
 
@@ -79,10 +79,22 @@
 
             <div id="calendar" class="calendar"></div>
         </section>
-        <section id="profileView" class="profile-view">
+        <section id="profileView" class="profile-view" style="display: none;">
             <h2>Profile</h2>
 
             <p id="profileEmail"></p>
+
+            <div class="profile-stats">
+                <div>
+                    <strong id="profileEntryCount">0</strong>
+                    <span>Entries</span>
+                </div>
+
+                <div>
+                    <strong id="profileCategoryCount">0</strong>
+                    <span>Categories</span>
+                </div>
+            </div>
 
             <input type="text" id="profileNameInput" placeholder="Username">
 

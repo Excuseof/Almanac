@@ -78,6 +78,8 @@ const nextMonthBtn = document.querySelector("#nextMonthBtn");
 const profileEmail = document.querySelector("#profileEmail");
 const profileNameInput = document.querySelector("#profileNameInput");
 const saveProfileBtn = document.querySelector("#saveProfileBtn");
+const profileEntryCount = document.querySelector("#profileEntryCount");
+const profileCategoryCount = document.querySelector("#profileCategoryCount");
 
 const addBtn = document.querySelector("#addBtn");
 const modal = document.querySelector("#modal");
@@ -93,7 +95,7 @@ let selectedFile = null;
 let currentCategory = "All";
 let currentUser = null;
 let currentUserProfile = null;
-let currentView = "Discovery";
+let currentView = "discovery";
 let selectedAuthorId = null;
 
 const today = new Date();
@@ -332,8 +334,24 @@ function showArchive() {
 function showProfile() {
     clearViews();
 
+    profileView.style.display = "block";
     profileView.classList.add("active");
     profileTab.classList.add("active-tab");
+
+    updateProfileStats();
+}
+
+function updateProfileStats() {
+    if (!currentUser) return;
+
+    const myEntries = entries.filter(entry => entry.userId === currentUser.uid);
+
+    const categories = new Set(
+        myEntries.map(entry => entry.category)
+    );
+
+    profileEntryCount.textContent = myEntries.length;
+    profileCategoryCount.textContent = categories.size;
 }
 
 function resetForm() {
@@ -360,7 +378,7 @@ window.viewAuthor = function (userId, name) {
     selectedAuthorId = userId;
     currentView = "author";
 
-    feedTab.textContent = `${name}'s Almanac`;
+    document.querySelector(".app-header p").textContent = `${name}'s Almanac`;
 
     showFeed();
     renderFeed();
@@ -457,9 +475,10 @@ archiveTab.addEventListener("click", () => {
 });
 
 feedTab.addEventListener("click", () => {
-    currentView = "Discovery";
+    currentView = "discovery";
     selectedAuthorId = null;
-    feedTab.textContent = "Discovery";
+
+    document.querySelector(".app-header p").textContent = "Collected over time.";
 
     showFeed();
     renderFeed();
@@ -473,7 +492,7 @@ myTab.addEventListener("click", () => {
 
     currentView = "mine";
     selectedAuthorId = null;
-    feedTab.textContent = "Discovery";
+    document.querySelector(".app-header p").textContent = "Collected over time.";
 
     showFeed();
     renderFeed();
@@ -593,7 +612,6 @@ onAuthStateChanged(auth, async (user) => {
 
         currentView = "mine";
         selectedAuthorId = null;
-        feedTab.textContent = "Discovery";
 
         await loadEntries();
         showArchive();
