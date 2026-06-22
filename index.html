@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Almanac</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <div class="app">
+        <header class="app-header">
+            <h1>Almanac</h1>
+            <p>A place to collect what would otherwise be forgotten.</p>
+        </header>
+
+        <section class="categories">
+            <button class="category-btn active-category" data-category="All">All</button>
+            <button class="category-btn" data-category="Away">Away</button>
+            <button class="category-btn" data-category="Workroom">Workroom</button>
+            <button class="category-btn" data-category="Everyday">Everyday</button>
+            <button class="category-btn" data-category="Table">Table</button>
+            <button class="category-btn" data-category="Places">Places</button>
+            <button class="category-btn" data-category="Notes">Notes</button>
+        </section>
+
+        <section class="view-tabs">
+            <button id="feedTab" class="active-tab">Feed</button>
+            <button id="archiveTab">Archive</button>
+        </section>
+
+        <main id="feedView"></main>
+
+        <section id="archiveView" class="archive-view">
+            <div class="archive-header">
+                <button id="prevMonthBtn">←</button>
+                <h2 id="archiveTitle">June 2026</h2>
+                <button id="nextMonthBtn">→</button>
+            </div>
+
+            <div class="weekdays">
+                <span>Sun</span>
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+            </div>
+
+            <div id="calendar" class="calendar"></div>
+        </section>
+    </div>
+
+    <button id="addBtn" class="floating-btn">+</button>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2>Add Entry</h2>
+
+            <label class="photo-upload">
+                <input type="file" id="photoInput" accept="image/*">
+                <span>Choose photo</span>
+            </label>
+
+            <img id="photoPreview" class="photo-preview" alt="">
+
+            <input type="text" id="title" placeholder="Title" />
+            <textarea id="description" placeholder="One sentence..."></textarea>
+            <input type="text" id="location" placeholder="Location (optional)" />
+
+            <select id="category">
+                <option>Away</option>
+                <option>Workroom</option>
+                <option>Everyday</option>
+                <option>Table</option>
+                <option>Places</option>
+                <option>Notes</option>
+            </select>
+
+            <button id="saveBtn">Save</button>
+            <button id="closeModalBtn">Cancel</button>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
