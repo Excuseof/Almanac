@@ -93,7 +93,7 @@ let selectedFile = null;
 let currentCategory = "All";
 let currentUser = null;
 let currentUserProfile = null;
-let currentView = "library";
+let currentView = "Discovery";
 let selectedAuthorId = null;
 
 const today = new Date();
@@ -457,9 +457,9 @@ archiveTab.addEventListener("click", () => {
 });
 
 feedTab.addEventListener("click", () => {
-    currentView = "library";
+    currentView = "Discovery";
     selectedAuthorId = null;
-    feedTab.textContent = "Library";
+    feedTab.textContent = "Discovery";
 
     showFeed();
     renderFeed();
@@ -473,7 +473,7 @@ myTab.addEventListener("click", () => {
 
     currentView = "mine";
     selectedAuthorId = null;
-    feedTab.textContent = "Library";
+    feedTab.textContent = "Discovery";
 
     showFeed();
     renderFeed();
@@ -593,7 +593,7 @@ onAuthStateChanged(auth, async (user) => {
 
         currentView = "mine";
         selectedAuthorId = null;
-        feedTab.textContent = "Library";
+        feedTab.textContent = "Discovery";
 
         await loadEntries();
         showArchive();
