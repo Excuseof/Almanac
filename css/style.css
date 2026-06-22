@@ -333,3 +333,32 @@ select {
     background: none;
     color: #3d2b1f;
 }
+
+.auth-box,
+.user-box {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.auth-box input {
+    padding: 10px;
+    border: 1px solid #d8cdbe;
+    background: #fffaf3;
+    color: #3d2b1f;
+}
+
+.auth-box button,
+.user-box button {
+    padding: 10px 14px;
+    border: 1px solid #3d2b1f;
+    background: none;
+    color: #3d2b1f;
+    cursor: pointer;
+}
+
+.user-box {
+    display: none;
+    justify-content: space-between;
+    color: #8a786a;
+}

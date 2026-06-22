@@ -1,3 +1,44 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDyVei4WQWqxPgwwVKDlVciz28Zyj35xcQ",
+    authDomain: "almanac-a0352.firebaseapp.com",
+    projectId: "almanac-a0352",
+    storageBucket: "almanac-a0352.firebasestorage.app",
+    messagingSenderId: "448289678386",
+    appId: "1:448289678386:web:7b6d043ab71d50c7b0482b"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const authBox = document.querySelector("#authBox");
+const userBox = document.querySelector("#userBox");
+const emailInput = document.querySelector("#emailInput");
+const passwordInput = document.querySelector("#passwordInput");
+const signupBtn = document.querySelector("#signupBtn");
+const loginBtn = document.querySelector("#loginBtn");
+const logoutBtn = document.querySelector("#logoutBtn");
+const userEmail = document.querySelector("#userEmail");
 const feedView = document.querySelector("#feedView");
 const archiveView = document.querySelector("#archiveView");
 const calendar = document.querySelector("#calendar");
@@ -316,3 +357,42 @@ categoryBtns.forEach((button) => {
 
 renderFeed();
 renderCalendar();
+signupBtn.addEventListener("click", async () => {
+    try {
+        await createUserWithEmailAndPassword(
+            auth,
+            emailInput.value,
+            passwordInput.value
+        );
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+loginBtn.addEventListener("click", async () => {
+    try {
+        await signInWithEmailAndPassword(
+            auth,
+            emailInput.value,
+            passwordInput.value
+        );
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+logoutBtn.addEventListener("click", async () => {
+    await signOut(auth);
+});
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        authBox.style.display = "none";
+        userBox.style.display = "flex";
+        userEmail.textContent = user.email;
+    } else {
+        authBox.style.display = "flex";
+        userBox.style.display = "none";
+        userEmail.textContent = "";
+    }
+});
