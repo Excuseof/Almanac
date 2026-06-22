@@ -16,8 +16,7 @@ import {
     deleteDoc,
     doc,
     query,
-    orderBy,
-    serverTimestamp
+    orderBy
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -32,10 +31,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-const CLOUD_NAME = "dbchhfvai";
-const UPLOAD_PRESET = "almanac_unsigned";
-
 const authBox = document.querySelector("#authBox");
 const userBox = document.querySelector("#userBox");
 const emailInput = document.querySelector("#emailInput");
@@ -44,7 +39,6 @@ const signupBtn = document.querySelector("#signupBtn");
 const loginBtn = document.querySelector("#loginBtn");
 const logoutBtn = document.querySelector("#logoutBtn");
 const userEmail = document.querySelector("#userEmail");
-
 const feedView = document.querySelector("#feedView");
 const archiveView = document.querySelector("#archiveView");
 const calendar = document.querySelector("#calendar");
@@ -52,6 +46,7 @@ const archiveTitle = document.querySelector("#archiveTitle");
 
 const feedTab = document.querySelector("#feedTab");
 const archiveTab = document.querySelector("#archiveTab");
+
 const prevMonthBtn = document.querySelector("#prevMonthBtn");
 const nextMonthBtn = document.querySelector("#nextMonthBtn");
 
@@ -62,12 +57,30 @@ const closeModalBtn = document.querySelector("#closeModalBtn");
 
 const photoInput = document.querySelector("#photoInput");
 const photoPreview = document.querySelector("#photoPreview");
+
 const categoryBtns = document.querySelectorAll(".category-btn");
 
-let entries = [];
-let selectedFile = null;
+let entries = JSON.parse(localStorage.getItem("entries")) || [];
+
+function saveEntries() {
+    localStorage.setItem("entries", JSON.stringify(entries));
+}
+
+entries = entries.map((entry) => {
+    if (!entry.id) {
+        return {
+            ...entry,
+            id: crypto.randomUUID()
+        };
+    }
+
+    return entry;
+});
+
+saveEntries();
+
+let selectedPhoto = "";
 let currentCategory = "All";
-let currentUser = null;
 
 const today = new Date();
 let currentArchiveYear = today.getFullYear();
@@ -82,48 +95,11 @@ function formatDate(date) {
 }
 
 function getFilteredEntries() {
-    if (currentCategory === "All") return entries;
-    return entries.filter(entry => entry.category === currentCategory);
-}
-
-async function uploadImageToCloudinary(file) {
-    if (!file) return "";
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", UPLOAD_PRESET);
-    formData.append("folder", "almanac");
-
-    const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-        {
-            method: "POST",
-            body: formData
-        }
-    );
-
-    const data = await response.json();
-
-    if (!data.secure_url) {
-        throw new Error("Image upload failed.");
+    if (currentCategory === "All") {
+        return entries;
     }
 
-    return data.secure_url;
-}
-
-async function loadEntries() {
-    const q = query(collection(db, "entries"), orderBy("rawDate", "desc"));
-    const snapshot = await getDocs(q);
-
-    entries = snapshot.docs.map(document => {
-        return {
-            id: document.id,
-            ...document.data()
-        };
-    });
-
-    renderFeed();
-    renderCalendar();
+    return entries.filter(entry => entry.category === currentCategory);
 }
 
 function renderFeed(customEntries = null) {
@@ -142,21 +118,19 @@ function renderFeed(customEntries = null) {
     feedView.innerHTML = "";
 
     filteredEntries.forEach((entry) => {
-        const canDelete = currentUser && currentUser.uid === entry.userId;
-
         feedView.innerHTML += `
       <article class="entry">
+
         <div class="entry-top">
           <div class="entry-date">${entry.displayDate}</div>
 
-          ${canDelete
-                ? `<button class="delete-btn" onclick="deleteEntry('${entry.id}')">×</button>`
-                : ""
-            }
+          <button class="delete-btn" onclick="deleteEntry('${entry.id}')">
+            ×
+          </button>
         </div>
 
-        ${entry.photoUrl
-                ? `<img src="${entry.photoUrl}" class="entry-image" alt="">`
+        ${entry.photo
+                ? `<img src="${entry.photo}" class="entry-image" alt="">`
                 : ""
             }
 
@@ -170,6 +144,7 @@ function renderFeed(customEntries = null) {
                 ? `<div class="entry-location">📍 ${entry.location}</div>`
                 : ""
             }
+
       </article>
     `;
     });
@@ -218,7 +193,7 @@ function renderCalendar() {
         dayBox.innerHTML = `
       <span>${day}</span>
       ${dayEntries.length > 0
-                ? `<span class="day-count">${"●".repeat(dayEntries.length)}</span>`
+                ? `<span class="day-count">${"●".repeat(dayEntries.length)} </span>`
                 : ""
             }
     `;
@@ -261,16 +236,19 @@ function resetForm() {
     photoInput.value = "";
     photoPreview.src = "";
     photoPreview.style.display = "none";
-    selectedFile = null;
+    selectedPhoto = "";
 }
 
-window.deleteEntry = async function (id) {
+window.deleteEntry = function (id) {
     const ok = confirm("Delete this entry?");
+
     if (!ok) return;
 
-    await deleteDoc(doc(db, "entries", id));
+    entries = entries.filter(entry => entry.id !== id);
 
-    await loadEntries();
+    saveEntries();
+    renderFeed();
+    renderCalendar();
 };
 
 photoInput.addEventListener("change", () => {
@@ -278,19 +256,18 @@ photoInput.addEventListener("change", () => {
 
     if (!file) return;
 
-    selectedFile = file;
+    const reader = new FileReader();
 
-    const previewUrl = URL.createObjectURL(file);
-    photoPreview.src = previewUrl;
-    photoPreview.style.display = "block";
+    reader.onload = () => {
+        selectedPhoto = reader.result;
+        photoPreview.src = selectedPhoto;
+        photoPreview.style.display = "block";
+    };
+
+    reader.readAsDataURL(file);
 });
 
 addBtn.addEventListener("click", () => {
-    if (!currentUser) {
-        alert("Please log in first.");
-        return;
-    }
-
     modal.classList.add("active");
 });
 
@@ -298,12 +275,7 @@ closeModalBtn.addEventListener("click", () => {
     modal.classList.remove("active");
 });
 
-saveBtn.addEventListener("click", async () => {
-    if (!currentUser) {
-        alert("Please log in first.");
-        return;
-    }
-
+saveBtn.addEventListener("click", () => {
     const title = document.querySelector("#title").value;
     const description = document.querySelector("#description").value;
     const location = document.querySelector("#location").value;
@@ -314,37 +286,27 @@ saveBtn.addEventListener("click", async () => {
         return;
     }
 
-    try {
-        saveBtn.textContent = "Saving...";
-        saveBtn.disabled = true;
+    const now = new Date();
 
-        const photoUrl = await uploadImageToCloudinary(selectedFile);
+    const newEntry = {
+        id: crypto.randomUUID(),
+        title,
+        description,
+        location,
+        category,
+        photo: selectedPhoto,
+        rawDate: now.toISOString(),
+        displayDate: formatDate(now)
+    };
 
-        const now = new Date();
+    entries.unshift(newEntry);
 
-        await addDoc(collection(db, "entries"), {
-            title,
-            description,
-            location,
-            category,
-            photoUrl,
-            rawDate: now.toISOString(),
-            displayDate: formatDate(now),
-            userId: currentUser.uid,
-            userEmail: currentUser.email,
-            createdAt: serverTimestamp()
-        });
+    saveEntries();
+    renderFeed();
+    renderCalendar();
+    resetForm();
 
-        await loadEntries();
-
-        resetForm();
-        modal.classList.remove("active");
-    } catch (error) {
-        alert(error.message);
-    } finally {
-        saveBtn.textContent = "Save";
-        saveBtn.disabled = false;
-    }
+    modal.classList.remove("active");
 });
 
 feedTab.addEventListener("click", () => {
@@ -393,6 +355,8 @@ categoryBtns.forEach((button) => {
     });
 });
 
+renderFeed();
+renderCalendar();
 signupBtn.addEventListener("click", async () => {
     try {
         await createUserWithEmailAndPassword(
@@ -421,9 +385,7 @@ logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
 });
 
-onAuthStateChanged(auth, async (user) => {
-    currentUser = user;
-
+onAuthStateChanged(auth, (user) => {
     if (user) {
         authBox.style.display = "none";
         userBox.style.display = "flex";
@@ -433,6 +395,4 @@ onAuthStateChanged(auth, async (user) => {
         userBox.style.display = "none";
         userEmail.textContent = "";
     }
-
-    await loadEntries();
 });
