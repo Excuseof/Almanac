@@ -358,12 +358,28 @@ function updateProfileStats() {
 }
 
 function showProfile() {
-    clearViews();
+    feedView.style.display = "none";
+    archiveView.classList.remove("active");
+
     profileView.style.display = "block";
     profileView.classList.add("active");
+
+    archiveTab.classList.remove("active-tab");
+    feedTab.classList.remove("active-tab");
+    myTab.classList.remove("active-tab");
     profileTab.classList.add("active-tab");
+
     updateProfileStats();
 }
+
+profileTab.addEventListener("click", () => {
+    if (!currentUser) {
+        alert("Please log in first.");
+        return;
+    }
+
+    showProfile();
+});
 
 function updateProfileStats() {
     if (!currentUser) return;

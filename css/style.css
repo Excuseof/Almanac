@@ -457,3 +457,11 @@ select {
 
     font-size: 14px;
 }
+
+.profile-view {
+    display: none;
+}
+
+.profile-view.active {
+    display: block !important;
+}
