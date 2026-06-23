@@ -303,7 +303,9 @@ function renderCalendar() {
 function clearViews() {
     feedView.style.display = "none";
     archiveView.classList.remove("active");
+
     profileView.classList.remove("active");
+    profileView.style.display = "none";
 
     archiveTab.classList.remove("active-tab");
     feedTab.classList.remove("active-tab");
@@ -356,15 +358,9 @@ function updateProfileStats() {
 }
 
 function showProfile() {
-    feedView.style.display = "none";
-    archiveView.classList.remove("active");
+    clearViews();
 
-    profileView.style.display = "block";
     profileView.classList.add("active");
-
-    archiveTab.classList.remove("active-tab");
-    feedTab.classList.remove("active-tab");
-    myTab.classList.remove("active-tab");
     profileTab.classList.add("active-tab");
 
     updateProfileStats();

@@ -465,3 +465,11 @@ select {
 .profile-view.active {
     display: block !important;
 }
+
+#profileView {
+    display: none !important;
+}
+
+#profileView.active {
+    display: block !important;
+}
