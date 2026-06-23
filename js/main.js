@@ -305,7 +305,7 @@ function clearViews() {
     archiveView.classList.remove("active");
 
     profileView.classList.remove("active");
-    profileView.removeAttribute("style");
+    profileView.style.display = "none";
 
     archiveTab.classList.remove("active-tab");
     feedTab.classList.remove("active-tab");
@@ -360,6 +360,7 @@ function updateProfileStats() {
 function showProfile() {
     clearViews();
 
+    profileView.style.display = "block";
     profileView.classList.add("active");
     profileTab.classList.add("active-tab");
 
